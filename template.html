@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Sunburst Chart</title>
+    <script type="text/javascript" src="d3.v3.min.js"></script>
+    <script type="text/javascript" src="pie.js"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+
+    <section>
+      <h1>Chart 1</h1>
+      <button onclick="updateChartA()">Data 1</button>
+      <button onclick="updateChartB()">Data 2</button>
+      <button onclick="updateChartC()">Data 3</button>
+
+      <div id="chart1"></div>
+
+      <script type="text/javascript">
+        var chart1 = document.getElementById("chart1");
+        d3.pie(chart1, {
+          'diameter': 800,
+          'width' : 1200,
+          'height' : 500,
+          'padding': 1,
+          'dataUrl' : 'data.json',
+          'dataType' : 'json',
+          'chartType' : 'bubble',
+          'dataStructure' : {
+            'name' : 'label',
+            'value' : 'value'
+          }
+        });
+        
+        
+        function updateChartA() {
+          d3.pie(chart1, "updateData", "data.json");
+        };
+
+        function updateChartB() {
+          d3.pie(chart1, "updateData", "data2.json");
+        };
+        
+        function updateChartC() {
+          d3.pie(chart1, "updateData", "data3.json");
+        };
+
+      </script>
+    </section>
+    
+  </body>
+</html>
