@@ -28,8 +28,8 @@ var Extend = Extend || function(){var h,g,b,e,i,c=arguments[0]||{},f=1,k=argumen
     
     // these are the plugin default settings that will be over-written by user settings
     d3.Sunburst.settings = {
-        'height' : 500,
-        'width' : 500,
+        'height' : 200,
+        'width' : 200,
         'radius' : 200,
         'speed' : 1000,
         'padding': 2,
@@ -88,10 +88,63 @@ var Extend = Extend || function(){var h,g,b,e,i,c=arguments[0]||{},f=1,k=argumen
 
             var container = this;
 
+            console.log(container.opts.dataStructure.children);
+
+            // create the svg element that holds the chart
+            container.chart = d3.select(container.el).append("svg")
+                .attr("width", container.opts.width)
+                .attr("height", container.opts.height)
+                .append("g")
+                .attr("transform", "translate(" + (container.opts.width / 2) + "," + (container.opts.height / 2) + ")")
+
+            container.partition = d3.layout.partition()
+                .sort(null)
+                .size([2 * Math.PI, container.opts.radius * container.opts.radius])
+                .children(function(d) {return d[container.opts.dataStructure.children]})
+                .value(function(d) { return d[container.opts.dataStructure.value]; });
+
+            container.arc = d3.svg.arc()
+                .startAngle(function(d) { return d.x; })
+                .endAngle(function(d) { return d.x + d.dx; })
+                .innerRadius(function(d) { return Math.sqrt(d.y); })
+                .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
+
+            container.updateChart();
+
         },
         updateChart : function() {
 
-            var container = this;
+            var container = this,
+                arcTween = function(a) {
+                    var i = d3.interpolate(this._current, a);
+                    this._current = i(0);
+                    return function(t) {
+                        return container.arc(i(t));
+                    };
+                };
+
+            console.log(container.data);
+
+            container.path = container.chart.datum(container.data).selectAll("path")
+                .data(container.partition.nodes)
+                .enter().append("path")
+                .attr("display", function(d) { return d.depth ? null : "none"; }) // hide inner ring
+                .attr("d", container.arc)
+                .style("stroke", "#fff")
+                .style("fill", function(d) {
+                    if (d[container.opts.dataStructure.children]) {
+                        return container.color(d.name);
+                    }
+                    else {
+                        return container.color(d.parent.name);
+                    }
+                })
+                .style("fill-rule", "evenodd")
+                .each(function(d) { 
+                    this._current = d;   
+                });
+
+            
                 
         },
         // resets the zoom on the chart
@@ -132,7 +185,8 @@ var Extend = Extend || function(){var h,g,b,e,i,c=arguments[0]||{},f=1,k=argumen
 
             d3.json(url, function(error, data) {
                 // data object
-                container.data = container.parseData(data);
+                container.data = data;
+                //container.data = container.parseData(data);
                 container.updateChart();
             });
         },
@@ -141,7 +195,8 @@ var Extend = Extend || function(){var h,g,b,e,i,c=arguments[0]||{},f=1,k=argumen
             var container = this;
             d3.json(url, function(error, data) {
                 // data object
-                container.data = container.parseData(data);
+                container.data = data;
+                //container.data = container.parseData(data);
                 container.buildChart();
             });
         },

@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <title>Sunburst Chart</title>
     <script type="text/javascript" src="d3.v3.min.js"></script>
-    <script type="text/javascript" src="pie.js"></script>
+    <script type="text/javascript" src="sunburst.js"></script>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -20,30 +20,31 @@
       <script type="text/javascript">
         var chart1 = document.getElementById("chart1");
         d3.sunburst(chart1, {
-          'diameter': 800,
-          'width' : 1200,
+          'radius': 200,
+          'width' : 500,
           'height' : 500,
           'padding': 1,
-          'dataUrl' : 'data.json',
+          'dataUrl' : 'flare.json',
           'dataType' : 'json',
           'chartType' : 'bubble',
           'dataStructure' : {
-            'name' : 'label',
-            'value' : 'value'
+            'name' : 'name',
+            'children' : 'group',
+            'value' : 'size'
           }
         });
         
         
         function updateChartA() {
-          d3.pie(chart1, "updateData", "data.json");
+          d3.sunburst(chart1, "updateData", "flare.json");
         };
 
         function updateChartB() {
-          d3.pie(chart1, "updateData", "data2.json");
+          d3.sunburst(chart1, "updateData", "flare2.json");
         };
         
         function updateChartC() {
-          d3.pie(chart1, "updateData", "data3.json");
+          d3.sunburst(chart1, "updateData", "flare3.json");
         };
 
       </script>
