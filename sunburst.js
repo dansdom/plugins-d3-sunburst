@@ -123,8 +123,8 @@ var Extend = Extend || function(){var h,g,b,e,i,c=arguments[0]||{},f=1,k=argumen
                     };
                 },
                 stash = function(d) {
-                    d.x0 = d.x;
-                    d.dx0 = 0;
+                    d.x0 = 0; // d.x;
+                    d.dx0 = 0; //d.dx;
                 };
 
             container.path = container.chart.datum(container.data).selectAll("path")
