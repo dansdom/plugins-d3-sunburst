@@ -1,11 +1,9 @@
 {
- "name": "flare",
+ "name": "flare3",
  "group": [
-    {"name": "AgglomerativeCluster", "size": 938},
-    {"name": "CommunityStructure", "size": 812},
-    {"name": "HierarchicalCluster", "size": 1714},
-    {"name": "MergeEdge", "size": 1743},
-    {"name": "MergeEdge1", "size": 743},
-    {"name": "MergeEdge2", "size": 743}
+    {"name": "Cluster", "size": 18},
+    {"name": "CommunityStructure", "size": 22},
+    {"name": "HierarchicalCluster", "size": 24},
+    {"name": "Hierarchical", "size": 44}
   ]
 }

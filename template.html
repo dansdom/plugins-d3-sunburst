@@ -14,6 +14,7 @@
       <button onclick="updateChartA()">Data 1</button>
       <button onclick="updateChartB()">Data 2</button>
       <button onclick="updateChartC()">Data 3</button>
+      <button onclick="updateChartD()">Data 4</button>
 
       <div id="chart1"></div>
 
@@ -45,6 +46,10 @@
         
         function updateChartC() {
           d3.sunburst(chart1, "updateData", "flare3.json");
+        };
+
+        function updateChartD() {
+          d3.sunburst(chart1, "updateData", "flare4.json");
         };
 
       </script>

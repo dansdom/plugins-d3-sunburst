@@ -69,7 +69,7 @@ var Extend = Extend || function(){var h,g,b,e,i,c=arguments[0]||{},f=1,k=argumen
                 container.color = d3.scale.ordinal().range(this.opts.colorRange);
             }
             else {
-                container.color = d3.scale.category20();
+                container.color = d3.scale.category20c();
             }
 
 
@@ -87,8 +87,6 @@ var Extend = Extend || function(){var h,g,b,e,i,c=arguments[0]||{},f=1,k=argumen
         buildChart : function() {
 
             var container = this;
-
-            console.log(container.opts.dataStructure.children);
 
             // create the svg element that holds the chart
             container.chart = d3.select(container.el).append("svg")
@@ -116,20 +114,46 @@ var Extend = Extend || function(){var h,g,b,e,i,c=arguments[0]||{},f=1,k=argumen
 
             var container = this,
                 arcTween = function(a) {
-                    var i = d3.interpolate(this._current, a);
-                    this._current = i(0);
+                    var i = d3.interpolate({x: a.x0, dx: a.dx0}, a);
                     return function(t) {
-                        return container.arc(i(t));
+                        var b = i(t);
+                        a.x0 = b.x;
+                        a.dx0 = b.dx;
+                        return container.arc(b);
                     };
+                },
+                stash = function(d) {
+                    d.x0 = d.x;
+                    d.dx0 = 0;
                 };
 
-            console.log(container.data);
-
             container.path = container.chart.datum(container.data).selectAll("path")
-                .data(container.partition.nodes)
-                .enter().append("path")
+                .data(container.partition.nodes);
+
+            container.path
+                .each(stash)
+                .transition()
+                .duration(container.opts.speed)
                 .attr("display", function(d) { return d.depth ? null : "none"; }) // hide inner ring
-                .attr("d", container.arc)
+                //.attr("d", container.arc)
+                .attrTween("d", arcTween)
+                .style("fill", function(d) {
+                    if (d[container.opts.dataStructure.children]) {
+                        return container.color(d.name);
+                    }
+                    else {
+                        return container.color(d.parent.name);
+                    }
+                });
+                
+            var oldValues = container.path.exit()
+            oldValues.remove();
+
+            var newValues = container.path.enter();
+            newValues.append("path")
+                .each(stash)
+                .attr("display", function(d) { return d.depth ? null : "none"; }) // hide inner ring
+                //.attr("d", container.arc)
                 .style("stroke", "#fff")
                 .style("fill", function(d) {
                     if (d[container.opts.dataStructure.children]) {
@@ -140,11 +164,11 @@ var Extend = Extend || function(){var h,g,b,e,i,c=arguments[0]||{},f=1,k=argumen
                     }
                 })
                 .style("fill-rule", "evenodd")
-                .each(function(d) { 
-                    this._current = d;   
-                });
+                .transition()
+                .duration(container.opts.speed)
+                .attrTween("d", arcTween)
+                
 
-            
                 
         },
         // resets the zoom on the chart
