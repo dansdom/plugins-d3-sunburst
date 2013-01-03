@@ -56,58 +56,14 @@ var Extend = Extend || function(){var h,g,b,e,i,c=arguments[0]||{},f=1,k=argumen
         init : function() {
 
             var container = this;
-            // define the size of the chart
-            container.width = this.opts.width;
-            container.height = this.opts.height;
+            
             // set the scale for the chart - I may or may not actually use this scale
-            container.scaleX = d3.scale.linear().range([0, container.width]);
-            container.scaleY = d3.scale.linear().range([0, container.height]);
+            container.scaleX = d3.scale.linear().range([0, this.opts.width]);
+            container.scaleY = d3.scale.linear().range([0, this.opts.height]);
             // define the data format - not 100% sure what this does. will need to research this attribute
             //container.format = d3.format(",d");
-            // if there is a colour range defined for this chart then use the settings. If not, use the inbuild category20 colour range
-            if (this.opts.colorRange.length > 0) {
-                container.color = d3.scale.ordinal().range(this.opts.colorRange);
-            }
-            else {
-                container.color = d3.scale.category20c();
-            }
 
-
-            // define the data for the graph
-            if (typeof this.opts.dataUrl == "string") {
-                // go get the data
-                this.getData(this.opts.dataUrl, this.opts.dataType);
-            }
-            else {
-                // just going to set data from the opts object
-                //this.setData(this.opts.data);
-            }
-
-        },
-        buildChart : function() {
-
-            var container = this;
-
-            // create the svg element that holds the chart
-            container.chart = d3.select(container.el).append("svg")
-                .attr("width", container.opts.width)
-                .attr("height", container.opts.height)
-                .append("g")
-                .attr("transform", "translate(" + (container.opts.width / 2) + "," + (container.opts.height / 2) + ")")
-
-            container.partition = d3.layout.partition()
-                .sort(null)
-                .size([2 * Math.PI, container.opts.radius * container.opts.radius])
-                .children(function(d) {return d[container.opts.dataStructure.children]})
-                .value(function(d) { return d[container.opts.dataStructure.value]; });
-
-            container.arc = d3.svg.arc()
-                .startAngle(function(d) { return d.x; })
-                .endAngle(function(d) { return d.x + d.dx; })
-                .innerRadius(function(d) { return Math.sqrt(d.y); })
-                .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
-
-            container.updateChart();
+            this.getData();
 
         },
         updateChart : function() {
@@ -126,6 +82,17 @@ var Extend = Extend || function(){var h,g,b,e,i,c=arguments[0]||{},f=1,k=argumen
                     d.x0 = 0; // d.x;
                     d.dx0 = 0; //d.dx;
                 };
+
+            // if there is a colour range defined for this chart then use the settings. If not, use the inbuild category20 colour range
+            if (this.opts.colorRange.length > 0) {
+                container.color = d3.scale.ordinal().range(this.opts.colorRange);
+            }
+            else {
+                container.color = d3.scale.category20c();
+            }
+
+            // set the layout for the chart
+            this.setLayout();
 
             container.path = container.chart.datum(container.data).selectAll("path")
                 .data(container.partition.nodes);
@@ -166,10 +133,35 @@ var Extend = Extend || function(){var h,g,b,e,i,c=arguments[0]||{},f=1,k=argumen
                 .style("fill-rule", "evenodd")
                 .transition()
                 .duration(container.opts.speed)
-                .attrTween("d", arcTween)
-                
+                .attrTween("d", arcTween);   
+        },
+        setLayout : function() {
+            var container = this;
 
-                
+            // create the svg element that holds the chart
+            if (!container.chart) {
+                container.chart = d3.select(container.el).append("svg")
+                    .attr("width", container.opts.width)
+                    .attr("height", container.opts.height)
+                    .append("g")
+                    .attr("transform", "translate(" + (container.opts.width / 2) + "," + (container.opts.height / 2) + ")");
+            }
+
+            if (!container.partition) {
+                container.partition = d3.layout.partition()
+                    .sort(null)
+                    .size([2 * Math.PI, container.opts.radius * container.opts.radius])
+                    .children(function(d) {return d[container.opts.dataStructure.children]})
+                    .value(function(d) { return d[container.opts.dataStructure.value]; });
+            }
+
+            if (!container.arc) {
+                container.arc = d3.svg.arc()
+                    .startAngle(function(d) { return d.x; })
+                    .endAngle(function(d) { return d.x + d.dx; })
+                    .innerRadius(function(d) { return Math.sqrt(d.y); })
+                    .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
+            }
         },
         // resets the zoom on the chart
         resetChart : function() {
@@ -215,13 +207,13 @@ var Extend = Extend || function(){var h,g,b,e,i,c=arguments[0]||{},f=1,k=argumen
             });
         },
         // gets data from a JSON request
-        getData : function(url, type) {
+        getData : function() {
             var container = this;
-            d3.json(url, function(error, data) {
+            d3.json(this.opts.dataUrl, function(error, data) {
                 // data object
                 container.data = data;
                 //container.data = container.parseData(data);
-                container.buildChart();
+                container.updateChart();
             });
         },
         // updates the settings of the chart
