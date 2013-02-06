@@ -46,7 +46,7 @@ var Extend = Extend || function(){var h,g,b,e,i,c=arguments[0]||{},f=1,k=argumen
         // defines the data structure of the document
         'dataStructure' : {
             'name' : 'label',
-            'value' : 'value'
+            'value' : 'size'
         },
         'chartName' : null
     };
@@ -218,7 +218,7 @@ var Extend = Extend || function(){var h,g,b,e,i,c=arguments[0]||{},f=1,k=argumen
                     node[children].forEach(function(child) { recurse(node[container.opts.dataStructure.name], child); });
                 }
                 else {
-                    dataList.push({packageName: name, className: node[container.opts.dataStructure.name], value: node.size});
+                    dataList.push({packageName: name, className: node[container.opts.dataStructure.name], value: parseFloat(node[container.opts.dataStructure.value])});
                 }
             };
 
@@ -257,6 +257,11 @@ var Extend = Extend || function(){var h,g,b,e,i,c=arguments[0]||{},f=1,k=argumen
         },
         // updates the settings of the chart
         settings : function(settings) {
+            // the data object is giving to much recursion on the Extend function.
+            // will have to manually clean it if more data is being set
+            if (settings.data) {
+                this.opts.data = null;
+            }
             // I need to sort out whether I want to refresh the graph when the settings are changed
             this.opts = Extend(true, {}, this.opts, settings);
             // will make custom function to handle setting changes
